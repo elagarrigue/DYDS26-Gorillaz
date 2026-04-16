@@ -1,4 +1,4 @@
-package edu.dyds.movies
+package edu.dyds.movies.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,7 +15,7 @@ class MoviesViewModel(
     private val tmdbHttpClient: HttpClient,
 ) : ViewModel() {
 
-    private val cacheMovies: MutableList<RemoteMovie> = mutableListOf()
+    private val cacheMovies: MutableList<edu.dyds.movies.RemoteMovie> = mutableListOf()
 
     private val moviesStateMutableStateFlow = MutableStateFlow(MoviesUiState())
 
@@ -67,11 +67,11 @@ class MoviesViewModel(
             }
         }
 
-    private fun List<RemoteMovie>.sortAndMap(): List<QualifiedMovie> {
+    private fun List<edu.dyds.movies.RemoteMovie>.sortAndMap(): List<edu.dyds.movies.QualifiedMovie> {
         return this
             .sortedByDescending { it.voteAverage }
             .map {
-                QualifiedMovie(
+                _root_ide_package_.edu.dyds.movies.QualifiedMovie(
                     movie = it.toDomainMovie(),
                     isGoodMovie = it.voteAverage >= MIN_VOTE_AVERAGE
                 )
@@ -85,20 +85,20 @@ class MoviesViewModel(
             null
         }
 
-    private suspend fun getTMDBMovieDetails(id: Int): RemoteMovie =
+    private suspend fun getTMDBMovieDetails(id: Int): edu.dyds.movies.RemoteMovie =
         tmdbHttpClient.get("/3/movie/$id").body()
 
 
-    private suspend fun getTMDBPopularMovies(): RemoteResult =
+    private suspend fun getTMDBPopularMovies(): edu.dyds.movies.RemoteResult =
         tmdbHttpClient.get("/3/discover/movie?sort_by=popularity.desc").body()
 
     data class MoviesUiState(
         val isLoading: Boolean = false,
-        val movies: List<QualifiedMovie> = emptyList(),
+        val movies: List<edu.dyds.movies.QualifiedMovie> = emptyList(),
     )
 
     data class MovieDetailUiState(
         val isLoading: Boolean = false,
-        val movie: Movie? = null,
+        val movie: edu.dyds.movies.Movie? = null,
     )
 }
