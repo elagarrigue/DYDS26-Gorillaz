@@ -2,6 +2,7 @@ package edu.dyds.movies.data
 
 import edu.dyds.movies.data.local.MoviesLocalDataSource
 import edu.dyds.movies.data.remote.MoviesRemoteDataSource
+import edu.dyds.movies.data.remote.toDomainMovie
 import edu.dyds.movies.domain.entities.Movie
 import edu.dyds.movies.domain.repository.MoviesRepository
 

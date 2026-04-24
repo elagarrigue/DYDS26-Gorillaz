@@ -2,17 +2,25 @@ package edu.dyds.movies.data.local
 
 import edu.dyds.movies.domain.entities.Movie
 
-class MoviesLocalDataSource {
+interface MoviesLocalDataSource {
+    fun getCachedMovies(): List<Movie>
+
+    fun saveMovies(movies: List<Movie>)
+
+    fun clearCache()
+}
+
+class InMemoryMoviesLocalDataSource : MoviesLocalDataSource {
     private val cachedMovies: MutableList<Movie> = mutableListOf()
 
-    fun getCachedMovies(): List<Movie> = cachedMovies
+    override fun getCachedMovies(): List<Movie> = cachedMovies
 
-    fun saveMovies(movies: List<Movie>) {
+    override fun saveMovies(movies: List<Movie>) {
         cachedMovies.clear()
         cachedMovies.addAll(movies)
     }
 
-    fun clearCache() {
+    override fun clearCache() {
         cachedMovies.clear()
     }
 }

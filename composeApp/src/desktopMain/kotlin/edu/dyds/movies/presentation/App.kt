@@ -3,10 +3,16 @@
 package edu.dyds.movies.presentation
 
 import androidx.compose.runtime.Composable
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import edu.dyds.movies.presentation.detail.DetailViewModel
+import edu.dyds.movies.presentation.home.HomeViewModel
 
 @Composable
-@Preview
-fun App() {
-    Navigation()
+fun App(
+    getHomeViewModel: @Composable () -> HomeViewModel,
+    getDetailViewModel: @Composable () -> DetailViewModel
+) {
+    Navigation(
+        getHomeViewModel = getHomeViewModel,
+        getDetailViewModel = getDetailViewModel
+    )
 }

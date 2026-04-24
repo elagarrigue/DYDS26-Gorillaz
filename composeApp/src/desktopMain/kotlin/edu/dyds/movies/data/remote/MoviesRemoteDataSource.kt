@@ -7,13 +7,24 @@ import io.ktor.client.request.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-class MoviesRemoteDataSource(private val tmdbHttpClient: HttpClient) {
+private const val POPULAR_MOVIES_PATH = "/3/discover/movie?sort_by=popularity.desc"
+private const val MOVIE_DETAILS_PATH = "/3/movie"
+private const val POSTER_BASE_URL = "https://image.tmdb.org/t/p/w185"
+private const val BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w780"
 
-    suspend fun getPopularMovies(): RemoteResult =
-        tmdbHttpClient.get("/3/discover/movie?sort_by=popularity.desc").body()
+interface MoviesRemoteDataSource {
+    suspend fun getPopularMovies(): RemoteResult
 
-    suspend fun getMovieDetails(id: Int): RemoteMovie =
-        tmdbHttpClient.get("/3/movie/$id").body()
+    suspend fun getMovieDetails(id: Int): RemoteMovie
+}
+
+class TmdbMoviesRemoteDataSource(private val tmdbHttpClient: HttpClient) : MoviesRemoteDataSource {
+
+    override suspend fun getPopularMovies(): RemoteResult =
+        tmdbHttpClient.get(POPULAR_MOVIES_PATH).body()
+
+    override suspend fun getMovieDetails(id: Int): RemoteMovie =
+        tmdbHttpClient.get("$MOVIE_DETAILS_PATH/$id").body()
 }
 
 @Serializable
@@ -36,19 +47,19 @@ data class RemoteMovie(
     @SerialName("original_language") val originalLanguage: String,
     val popularity: Double,
     @SerialName("vote_average") val voteAverage: Double,
-) {
-    fun toDomainMovie(): Movie {
-        return Movie(
-            id = id,
-            title = title,
-            overview = overview,
-            releaseDate = releaseDate,
-            poster = "https://image.tmdb.org/t/p/w185$posterPath",
-            backdrop = backdropPath?.let { "https://image.tmdb.org/t/p/w780$it" },
-            originalTitle = originalTitle,
-            originalLanguage = originalLanguage,
-            popularity = popularity,
-            voteAverage = voteAverage
-        )
-    }
+)
+
+fun RemoteMovie.toDomainMovie(): Movie {
+    return Movie(
+        id = id,
+        title = title,
+        overview = overview,
+        releaseDate = releaseDate,
+        poster = "$POSTER_BASE_URL$posterPath",
+        backdrop = backdropPath?.let { "$BACKDROP_BASE_URL$it" },
+        originalTitle = originalTitle,
+        originalLanguage = originalLanguage,
+        popularity = popularity,
+        voteAverage = voteAverage
+    )
 }
