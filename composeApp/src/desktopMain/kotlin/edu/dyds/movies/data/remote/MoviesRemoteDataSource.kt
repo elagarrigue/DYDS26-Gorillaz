@@ -18,7 +18,7 @@ interface MoviesRemoteDataSource {
     suspend fun getMovieDetails(id: Int): RemoteMovie
 }
 
-class TmdbMoviesRemoteDataSource(private val tmdbHttpClient: HttpClient) : MoviesRemoteDataSource {
+class MoviesRemoteDataSourceImpl(private val tmdbHttpClient: HttpClient) : MoviesRemoteDataSource {
 
     override suspend fun getPopularMovies(): RemoteResult =
         tmdbHttpClient.get(POPULAR_MOVIES_PATH).body()

@@ -6,11 +6,9 @@ interface MoviesLocalDataSource {
     fun getCachedMovies(): List<Movie>
 
     fun saveMovies(movies: List<Movie>)
-
-    fun clearCache()
 }
 
-class InMemoryMoviesLocalDataSource : MoviesLocalDataSource {
+class MoviesLocalDataSourceImpl : MoviesLocalDataSource {
     private val cachedMovies: MutableList<Movie> = mutableListOf()
 
     override fun getCachedMovies(): List<Movie> = cachedMovies
@@ -18,9 +16,5 @@ class InMemoryMoviesLocalDataSource : MoviesLocalDataSource {
     override fun saveMovies(movies: List<Movie>) {
         cachedMovies.clear()
         cachedMovies.addAll(movies)
-    }
-
-    override fun clearCache() {
-        cachedMovies.clear()
     }
 }
