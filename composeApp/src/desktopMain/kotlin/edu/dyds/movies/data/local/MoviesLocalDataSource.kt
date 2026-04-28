@@ -6,8 +6,6 @@ interface MoviesLocalDataSource {
     fun getCachedMovies(): List<Movie>
 
     fun saveMovies(movies: List<Movie>)
-
-    fun clearCache()
 }
 
 class MoviesLocalDataSourceImpl : MoviesLocalDataSource {
@@ -18,9 +16,5 @@ class MoviesLocalDataSourceImpl : MoviesLocalDataSource {
     override fun saveMovies(movies: List<Movie>) {
         cachedMovies.clear()
         cachedMovies.addAll(movies)
-    }
-
-    override fun clearCache() {
-        cachedMovies.clear()
     }
 }
