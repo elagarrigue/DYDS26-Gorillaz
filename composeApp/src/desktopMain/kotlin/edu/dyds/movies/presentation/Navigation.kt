@@ -1,6 +1,6 @@
 @file:Suppress("FunctionName")
 
-package edu.dyds.movies
+package edu.dyds.movies.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavGraphBuilder
@@ -10,7 +10,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import edu.dyds.movies.MoviesDependencyInjector.getMoviesViewModel
+import edu.dyds.movies.presentation.detail.DetailViewModel
+import edu.dyds.movies.presentation.detail.DetailScreen
+import edu.dyds.movies.presentation.home.HomeViewModel
+import edu.dyds.movies.presentation.home.HomeScreen
 
 private const val HOME = "home"
 
@@ -19,19 +22,25 @@ private const val DETAIL = "detail"
 private const val MOVIE_ID = "movieId"
 
 @Composable
-fun Navigation() {
+fun Navigation(
+    getHomeViewModel: @Composable () -> HomeViewModel,
+    getDetailViewModel: @Composable () -> DetailViewModel
+) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = HOME) {
-        homeDestination(navController)
-        detailDestination(navController)
+        homeDestination(navController, getHomeViewModel)
+        detailDestination(navController, getDetailViewModel)
     }
 }
 
-private fun NavGraphBuilder.homeDestination(navController: NavHostController) {
+private fun NavGraphBuilder.homeDestination(
+    navController: NavHostController,
+    getHomeViewModel: @Composable () -> HomeViewModel
+) {
     composable(HOME) {
         HomeScreen(
-            viewModel = getMoviesViewModel(),
+            viewModel = getHomeViewModel(),
             onGoodMovieClick = {
                 navController.navigate("$DETAIL/${it.id}")
             }
@@ -39,7 +48,10 @@ private fun NavGraphBuilder.homeDestination(navController: NavHostController) {
     }
 }
 
-private fun NavGraphBuilder.detailDestination(navController: NavHostController) {
+private fun NavGraphBuilder.detailDestination(
+    navController: NavHostController,
+    getDetailViewModel: @Composable () -> DetailViewModel
+) {
     composable(
         route = "$DETAIL/{$MOVIE_ID}",
         arguments = listOf(navArgument(MOVIE_ID) { type = NavType.IntType })
@@ -47,7 +59,7 @@ private fun NavGraphBuilder.detailDestination(navController: NavHostController) 
         val movieId = backstackEntry.arguments?.getInt(MOVIE_ID)
 
         movieId?.let {
-            DetailScreen(getMoviesViewModel(), it, onBack = { navController.popBackStack() })
+            DetailScreen(getDetailViewModel(), it, onBack = { navController.popBackStack() })
         }
     }
 }
