@@ -187,4 +187,3 @@ class TestHomeViewModel {
         return QualifiedMovie(movie, isGood)
     }
 }
-
