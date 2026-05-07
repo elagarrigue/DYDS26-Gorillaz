@@ -1,3 +1,5 @@
+package viewmodel
+
 import edu.dyds.movies.domain.entities.Movie
 import edu.dyds.movies.domain.usecase.GetMovieDetailsUseCase
 import edu.dyds.movies.presentation.detail.DetailViewModel

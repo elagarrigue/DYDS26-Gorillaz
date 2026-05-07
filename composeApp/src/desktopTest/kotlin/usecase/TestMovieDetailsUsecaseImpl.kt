@@ -1,3 +1,5 @@
+package usecase
+
 import edu.dyds.movies.domain.entities.Movie
 import edu.dyds.movies.domain.repository.MoviesRepository
 import edu.dyds.movies.domain.usecase.GetMovieDetailsUseCaseImpl
