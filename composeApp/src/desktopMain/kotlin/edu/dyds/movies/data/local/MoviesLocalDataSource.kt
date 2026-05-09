@@ -11,7 +11,7 @@ interface MoviesLocalDataSource {
 class MoviesLocalDataSourceImpl : MoviesLocalDataSource {
     private val cachedMovies: MutableList<Movie> = mutableListOf()
 
-    override fun getCachedMovies(): List<Movie> = cachedMovies
+    override fun getCachedMovies(): List<Movie> = cachedMovies.toList()
 
     override fun saveMovies(movies: List<Movie>) {
         cachedMovies.clear()
