@@ -14,8 +14,6 @@ import kotlin.test.assertTrue
 
 class MoviesRepositoryImplTest {
 
-    // ── Fakes ────────────────────────────────────────────────────────────────
-
     class FakeLocalDataSource : MoviesLocalDataSource {
         var savedMovies: List<Movie> = emptyList()
         var cachedMoviesReturn: List<Movie> = emptyList()
@@ -39,8 +37,6 @@ class MoviesRepositoryImplTest {
             return movieDetailsReturn ?: throw Exception("Not found")
         }
     }
-
-    // ── Helpers ──────────────────────────────────────────────────────────────
 
     private fun buildRemoteMovie(id: Int = 1) = RemoteMovie(
         id = id,
@@ -68,7 +64,6 @@ class MoviesRepositoryImplTest {
         voteAverage = 8.5
     )
 
-    // ── getPopularMovies ─────────────────────────────────────────────────────
 
     @Test
     fun `getPopularMovies - when cache is not empty - returns cached movies`() = runTest {
@@ -93,7 +88,7 @@ class MoviesRepositoryImplTest {
         val remote = FakeRemoteDataSource().apply {
             popularMoviesReturn = RemoteResult(1, listOf(buildRemoteMovie(10)), 1, 1)
         }
-        val local = FakeLocalDataSource() // caché vacío por defecto
+        val local = FakeLocalDataSource()
         val repository = MoviesRepositoryImpl(remote, local)
 
         // act
@@ -102,7 +97,7 @@ class MoviesRepositoryImplTest {
         // assert
         assertEquals(1, result.size)
         assertEquals(10, result.first().id)
-        assertEquals(1, local.savedMovies.size)  // saveMovies fue llamado
+        assertEquals(1, local.savedMovies.size)
     }
 
     @Test
@@ -117,10 +112,8 @@ class MoviesRepositoryImplTest {
 
         // assert
         assertTrue(result.isEmpty())
-        assertTrue(local.savedMovies.isEmpty())  // saveMovies NO fue llamado
+        assertTrue(local.savedMovies.isEmpty())
     }
-
-    // ── getMovieDetails ──────────────────────────────────────────────────────
 
     @Test
     fun `getMovieDetails - when remote succeeds - returns mapped movie`() = runTest {
