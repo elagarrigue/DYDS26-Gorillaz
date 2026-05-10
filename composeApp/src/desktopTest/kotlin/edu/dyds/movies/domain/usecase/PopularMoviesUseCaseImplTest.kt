@@ -27,16 +27,36 @@ class TestPopularMoviesUseCaseImpl {
 
     @Test
     fun `invoke should return empty list when repository returns empty`() = runTest {
+        // arrange
         val repository = MoviesRepositoryFake(moviesToReturn = emptyList())
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
+        // act
         val result = useCase()
 
+        // assert
         assertEquals(emptyList<QualifiedMovie>(), result)
     }
 
     @Test
+    fun `invoke should handle single movie list correctly`() = runTest {
+        // arrange
+        val movie = createMovie(id = 1, voteAverage = 7.5)
+        val repository = MoviesRepositoryFake(moviesToReturn = listOf(movie))
+        val useCase = GetPopularMoviesUseCaseImpl(repository)
+
+        // act
+        val result = useCase()
+
+        // assert
+        assertEquals(1, result.size)
+        assertEquals(7.5, result[0].movie.voteAverage)
+        assertEquals(true, result[0].isGoodMovie)
+    }
+
+    @Test
     fun `invoke should return movies sorted descending by vote average`() = runTest {
+        // arrange
         val movies = listOf(
             createMovie(id = 1, title = "Movie 1", voteAverage = 5.0),
             createMovie(id = 2, title = "Movie 2", voteAverage = 8.5),
@@ -45,8 +65,10 @@ class TestPopularMoviesUseCaseImpl {
         val repository = MoviesRepositoryFake(moviesToReturn = movies)
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
+        // act
         val result = useCase()
 
+        // assert
         assertEquals(8.5, result[0].movie.voteAverage)
         assertEquals(7.0, result[1].movie.voteAverage)
         assertEquals(5.0, result[2].movie.voteAverage)
@@ -54,6 +76,7 @@ class TestPopularMoviesUseCaseImpl {
 
     @Test
     fun `invoke should mark movie as good when vote average is greater than or equal to 6 dot 0`() = runTest {
+        // arrange
         val movies = listOf(
             createMovie(id = 1, voteAverage = 6.0),
             createMovie(id = 2, voteAverage = 7.5),
@@ -62,13 +85,16 @@ class TestPopularMoviesUseCaseImpl {
         val repository = MoviesRepositoryFake(moviesToReturn = movies)
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
+        // act
         val result = useCase()
 
+        // assert
         assertTrue(result.all { it.isGoodMovie })
     }
 
     @Test
     fun `invoke should mark movie as bad when vote average is less than 6 dot 0`() = runTest {
+        // arrange
         val movies = listOf(
             createMovie(id = 1, voteAverage = 5.9),
             createMovie(id = 2, voteAverage = 3.0),
@@ -77,26 +103,32 @@ class TestPopularMoviesUseCaseImpl {
         val repository = MoviesRepositoryFake(moviesToReturn = movies)
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
+        // act
         val result = useCase()
 
+        // assert
         assertTrue(result.none { it.isGoodMovie })
     }
 
     @Test
     fun `invoke should correctly classify movies with vote average at threshold boundary`() = runTest {
+        // arrange
         val goodMovie = createMovie(id = 1, voteAverage = 6.0)
         val badMovie = createMovie(id = 2, voteAverage = 5.999)
         val repository = MoviesRepositoryFake(moviesToReturn = listOf(goodMovie, badMovie))
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
+        // act
         val result = useCase()
 
+        // assert
         assertEquals(true, result[0].isGoodMovie)
         assertEquals(false, result[1].isGoodMovie)
     }
 
     @Test
     fun `invoke should transform all movies to qualified movies`() = runTest {
+        // arrange
         val movies = listOf(
             createMovie(id = 1, title = "Movie 1", voteAverage = 8.0),
             createMovie(id = 2, title = "Movie 2", voteAverage = 5.0),
@@ -105,24 +137,30 @@ class TestPopularMoviesUseCaseImpl {
         val repository = MoviesRepositoryFake(moviesToReturn = movies)
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
+        // act
         val result = useCase()
 
+        // assert
         assertEquals(3, result.size)
         assertTrue(result.all { it.movie in movies })
     }
 
     @Test
     fun `invoke should invoke repository exactly once`() = runTest {
+        // arrange
         val repository = MoviesRepositoryFake(moviesToReturn = emptyList())
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
+        // act
         useCase()
 
+        // assert
         assertEquals(1, repository.getPopularMoviesInvocations)
     }
 
     @Test
     fun `invoke should maintain movie data integrity when transforming to qualified movies`() = runTest {
+        // arrange
         val originalMovie = createMovie(
             id = 42,
             title = "Inception",
@@ -138,8 +176,10 @@ class TestPopularMoviesUseCaseImpl {
         val repository = MoviesRepositoryFake(moviesToReturn = listOf(originalMovie))
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
+        // act
         val result = useCase()
 
+        // assert
         assertEquals(1, result.size)
         assertEquals(originalMovie, result[0].movie)
     }

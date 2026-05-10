@@ -26,8 +26,10 @@ class MoviesRepositoryImplTest {
         var popularMoviesReturn: RemoteResult = RemoteResult(1, emptyList(), 0, 0)
         var movieDetailsReturn: RemoteMovie? = null
         var shouldThrow: Boolean = false
+        var getPopularMoviesInvocations: Int = 0
 
         override suspend fun getPopularMovies(): RemoteResult {
+            getPopularMoviesInvocations++
             if (shouldThrow) throw Exception("Network error")
             return popularMoviesReturn
         }
@@ -80,6 +82,7 @@ class MoviesRepositoryImplTest {
         // assert
         assertEquals(2, result.size)
         assertEquals(local.cachedMoviesReturn, result)
+        assertEquals(0, remote.getPopularMoviesInvocations)
     }
 
     @Test
@@ -98,6 +101,29 @@ class MoviesRepositoryImplTest {
         assertEquals(1, result.size)
         assertEquals(10, result.first().id)
         assertEquals(1, local.savedMovies.size)
+    }
+
+    @Test
+    fun `getPopularMovies - when cache is empty and remote succeeds - applies URL mapping to images`() = runTest {
+        // arrange
+        val remoteMovie = buildRemoteMovie(1).copy(
+            posterPath = "/test_poster.jpg",
+            backdropPath = "/test_backdrop.jpg"
+        )
+        val remote = FakeRemoteDataSource().apply {
+            popularMoviesReturn = RemoteResult(1, listOf(remoteMovie), 1, 1)
+        }
+        val local = FakeLocalDataSource()
+        val repository = MoviesRepositoryImpl(remote, local)
+
+        // act
+        val result = repository.getPopularMovies()
+
+        // assert
+        assertEquals(1, result.size)
+        val mappedMovie = result.first()
+        assertEquals("https://image.tmdb.org/t/p/w185/test_poster.jpg", mappedMovie.poster)
+        assertEquals("https://image.tmdb.org/t/p/w780/test_backdrop.jpg", mappedMovie.backdrop)
     }
 
     @Test

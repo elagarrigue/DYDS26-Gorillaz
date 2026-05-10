@@ -19,52 +19,65 @@ class MoviesLocalDataSourceImplTest {
 
     @Test
     fun `getCachedMovies without saved movies should return empty list`() {
+        // arrange
         val expected = emptyList<Movie>()
 
+        // act
         val result = localDataSource.getCachedMovies()
 
+        // assert
         assertEquals(expected, result)
     }
 
     @Test
     fun `saveMovies with movies should store and return the same movies`() {
+        // arrange
         val movies = listOf(
             createMovie(id = 1, title = "Movie 1"),
             createMovie(id = 2, title = "Movie 2")
         )
 
+        // act
         localDataSource.saveMovies(movies)
 
+        // assert
         val cachedMovies = localDataSource.getCachedMovies()
         assertEquals(movies, cachedMovies)
     }
 
     @Test
     fun `saveMovies with existing cache should replace it completely`() {
+        // arrange
         localDataSource.saveMovies(listOf(createMovie(id = 1, title = "Old Movie")))
         val newMovies = listOf(
             createMovie(id = 2, title = "New Movie 1"),
             createMovie(id = 3, title = "New Movie 2")
         )
 
+        // act
         localDataSource.saveMovies(newMovies)
 
+        // assert
         val cachedMovies = localDataSource.getCachedMovies()
         assertEquals(newMovies, cachedMovies)
     }
 
     @Test
     fun `saveMovies with empty list should clear existing cache`() {
+        // arrange
         localDataSource.saveMovies(listOf(createMovie(id = 1, title = "Movie to clear")))
 
+        // act
         localDataSource.saveMovies(emptyList())
 
+        // assert
         val cachedMovies = localDataSource.getCachedMovies()
         assertTrue(cachedMovies.isEmpty())
     }
 
     @Test
     fun `saveMovies with extreme values should preserve them unchanged`() {
+        // arrange
         val extremeMovies = listOf(
             createMovie(id = -1, title = "", popularity = Double.MAX_VALUE, voteAverage = 0.0),
             createMovie(
@@ -80,14 +93,17 @@ class MoviesLocalDataSourceImplTest {
             )
         )
 
+        // act
         localDataSource.saveMovies(extremeMovies)
 
+        // assert
         val cachedMovies = localDataSource.getCachedMovies()
         assertEquals(extremeMovies, cachedMovies)
     }
 
     @Test
     fun `getCachedMovies should return copy to prevent external cache corruption`() {
+        // arrange
         val originalMovies = listOf(
             createMovie(id = 1, title = "Original 1"),
             createMovie(id = 2, title = "Original 2")
@@ -95,21 +111,26 @@ class MoviesLocalDataSourceImplTest {
         localDataSource.saveMovies(originalMovies)
         val exposedMovies = localDataSource.getCachedMovies() as MutableList<Movie>
 
+        // act
         exposedMovies.clear()
 
+        // assert
         val cachedMovies = localDataSource.getCachedMovies()
         assertEquals(originalMovies, cachedMovies)
     }
 
     @Test
     fun `saveMovies with null input via JVM interop should throw NullPointerException`() {
+        // arrange
         val saveMoviesMethod =
             MoviesLocalDataSourceImpl::class.java.getMethod("saveMovies", List::class.java)
 
+        // act
         val exception = assertFailsWith<InvocationTargetException> {
             saveMoviesMethod.invoke(localDataSource, null)
         }
 
+        // assert
         assertTrue(exception.cause is NullPointerException)
     }
 

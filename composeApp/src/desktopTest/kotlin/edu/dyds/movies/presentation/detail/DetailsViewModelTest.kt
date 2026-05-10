@@ -37,15 +37,19 @@ class DetailViewModelTest {
         private val movie: Movie? = null
     ) : GetMovieDetailsUseCase {
         var invocations = 0
+        var lastRequestedId: Int? = null
 
         override suspend fun invoke(id: Int): Movie? {
             invocations++
+            lastRequestedId = id
+            kotlinx.coroutines.yield()
             return movie
         }
     }
 
     @Test
     fun `initial state has loading false and null movie`() = runTest(testDispatcher) {
+        // arrange
         val useCase = GetMovieDetailsUseCaseFake()
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailViewModel.MovieDetailUiState>()
@@ -54,10 +58,12 @@ class DetailViewModelTest {
             viewModel.movieDetailStateFlow.collect { states.add(it) }
         }
 
+        // act
         advanceUntilIdle()
 
         collectJob.cancel()
 
+        // assert
         assertEquals(1, states.size)
         assertEquals(false, states[0].isLoading)
         assertNull(states[0].movie)
@@ -65,6 +71,7 @@ class DetailViewModelTest {
 
     @Test
     fun `getMovieDetail should end with loading false and movie`() = runTest(testDispatcher) {
+        // arrange
         val expected = createDefaultMovie(id = 42, title = "The Answer")
         val useCase = GetMovieDetailsUseCaseFake(movie = expected)
         val viewModel = DetailViewModel(useCase)
@@ -76,12 +83,14 @@ class DetailViewModelTest {
 
         advanceUntilIdle()
 
+        // act
         viewModel.getMovieDetail(42)
 
         advanceUntilIdle()
 
         collectJob.cancel()
 
+        // assert
         assertTrue(states.isNotEmpty())
         assertEquals(false, states.last().isLoading)
         assertNotNull(states.last().movie)
@@ -89,20 +98,25 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun `getMovieDetail should invoke use case exactly once`() = runTest(testDispatcher) {
+    fun `getMovieDetail should invoke use case exactly once and pass correct id`() = runTest(testDispatcher) {
+        // arrange
         val expected = createDefaultMovie()
         val useCase = GetMovieDetailsUseCaseFake(movie = expected)
         val viewModel = DetailViewModel(useCase)
 
-        viewModel.getMovieDetail(1)
+        // act
+        viewModel.getMovieDetail(42)
 
         advanceUntilIdle()
 
+        // assert
         assertEquals(1, useCase.invocations)
+        assertEquals(42, useCase.lastRequestedId)
     }
 
     @Test
     fun `getMovieDetail should end with null movie when use case returns null`() = runTest(testDispatcher) {
+        // arrange
         val useCase = GetMovieDetailsUseCaseFake(movie = null)
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailViewModel.MovieDetailUiState>()
@@ -113,15 +127,43 @@ class DetailViewModelTest {
 
         advanceUntilIdle()
 
+        // act
         viewModel.getMovieDetail(7)
 
         advanceUntilIdle()
 
         collectJob.cancel()
 
+        // assert
         assertTrue(states.isNotEmpty())
         assertEquals(false, states.last().isLoading)
         assertNull(states.last().movie)
+    }
+
+    @Test
+    fun `getMovieDetail should emit loading true state before emitting movie`() = runTest(testDispatcher) {
+        // arrange
+        val useCase = GetMovieDetailsUseCaseFake(movie = createDefaultMovie())
+        val viewModel = DetailViewModel(useCase)
+        val states = mutableListOf<DetailViewModel.MovieDetailUiState>()
+
+        val collectJob = launch {
+            viewModel.movieDetailStateFlow.collect { states.add(it) }
+        }
+
+        advanceUntilIdle()
+
+        // act
+        viewModel.getMovieDetail(1)
+        
+        advanceUntilIdle()
+        collectJob.cancel()
+
+        // assert
+        assertTrue(states.size >= 2)
+        val intermediateState = states[states.size - 2]
+        assertEquals(true, intermediateState.isLoading)
+        assertNull(intermediateState.movie)
     }
 
     private fun createDefaultMovie(
