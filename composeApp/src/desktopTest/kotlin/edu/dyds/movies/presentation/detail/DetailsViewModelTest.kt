@@ -1,8 +1,7 @@
-package viewmodel
+package edu.dyds.movies.presentation.detail
 
 import edu.dyds.movies.domain.entities.Movie
 import edu.dyds.movies.domain.usecase.GetMovieDetailsUseCase
-import edu.dyds.movies.presentation.detail.DetailViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch

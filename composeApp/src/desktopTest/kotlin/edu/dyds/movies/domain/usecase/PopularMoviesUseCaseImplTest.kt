@@ -1,9 +1,8 @@
-package usecase
+package edu.dyds.movies.domain.usecase
 
 import edu.dyds.movies.domain.entities.Movie
 import edu.dyds.movies.domain.entities.QualifiedMovie
 import edu.dyds.movies.domain.repository.MoviesRepository
-import edu.dyds.movies.domain.usecase.GetPopularMoviesUseCaseImpl
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
