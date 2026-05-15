@@ -71,11 +71,14 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun `getMovieDetail should invoke use case exactly once and pass correct id`() = runTest {
+    fun `getMovieDetail should invoke use case once, pass correct id and emit movie`() = runTest {
         // arrange
         val expected = createDefaultMovie()
         val useCase = FakeGetMovieDetailsUseCase(movie = expected)
         val viewModel = DetailViewModel(useCase)
+        val states = mutableListOf<DetailViewModel.MovieDetailUiState>()
+
+        testScope.launch { viewModel.movieDetailStateFlow.collect { states.add(it) } }
 
         // act
         viewModel.getMovieDetail(42)
@@ -83,6 +86,8 @@ class DetailViewModelTest {
         // assert
         assertEquals(1, useCase.invocations)
         assertEquals(42, useCase.lastRequestedId)
+        assertTrue(states.isNotEmpty())
+        assertEquals(expected, states.last().movie)
     }
 
     @Test

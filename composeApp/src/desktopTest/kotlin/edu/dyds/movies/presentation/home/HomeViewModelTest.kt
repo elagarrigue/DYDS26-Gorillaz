@@ -69,16 +69,21 @@ class TestHomeViewModel {
     }
 
     @Test
-    fun `getAllMovies should invoke use case exactly once`() = runTest {
+    fun `getAllMovies should invoke use case once and emit loading false in final state`() = runTest {
         // arrange
         val useCase = FakeGetPopularMoviesUseCase()
         val viewModel = HomeViewModel(useCase)
+        val states = mutableListOf<HomeViewModel.MoviesUiState>()
+
+        testScope.launch { viewModel.moviesStateFlow.collect { states.add(it) } }
 
         // act
         viewModel.getAllMovies()
 
         // assert
         assertEquals(1, useCase.invocations)
+        assertTrue(states.isNotEmpty())
+        assertEquals(false, states.last().isLoading)
     }
 
     @Test
