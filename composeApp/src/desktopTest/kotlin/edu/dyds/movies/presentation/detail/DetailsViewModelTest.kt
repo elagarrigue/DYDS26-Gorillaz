@@ -2,11 +2,11 @@ package edu.dyds.movies.presentation.detail
 
 import edu.dyds.movies.domain.entities.Movie
 import edu.dyds.movies.presentation.fakes.FakeGetMovieDetailsUseCase
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -21,7 +21,8 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class DetailViewModelTest {
 
-    private val testDispatcher = StandardTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = CoroutineScope(testDispatcher)
 
     @Before
     fun setup() {
@@ -34,20 +35,14 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun `initial state has loading false and null movie`() = runTest(testDispatcher) {
+    fun `initial state has loading false and null movie`() = runTest {
         // arrange
         val useCase = FakeGetMovieDetailsUseCase()
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailViewModel.MovieDetailUiState>()
 
-        val collectJob = launch {
-            viewModel.movieDetailStateFlow.collect { states.add(it) }
-        }
-
         // act
-        advanceUntilIdle()
-
-        collectJob.cancel()
+        testScope.launch { viewModel.movieDetailStateFlow.collect { states.add(it) } }
 
         // assert
         assertEquals(1, states.size)
@@ -56,25 +51,17 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun `getMovieDetail should end with loading false and movie`() = runTest(testDispatcher) {
+    fun `getMovieDetail should end with loading false and movie`() = runTest {
         // arrange
         val expected = createDefaultMovie(id = 42, title = "The Answer")
         val useCase = FakeGetMovieDetailsUseCase(movie = expected)
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailViewModel.MovieDetailUiState>()
 
-        val collectJob = launch {
-            viewModel.movieDetailStateFlow.collect { states.add(it) }
-        }
-
-        advanceUntilIdle()
+        testScope.launch { viewModel.movieDetailStateFlow.collect { states.add(it) } }
 
         // act
         viewModel.getMovieDetail(42)
-
-        advanceUntilIdle()
-
-        collectJob.cancel()
 
         // assert
         assertTrue(states.isNotEmpty())
@@ -84,7 +71,7 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun `getMovieDetail should invoke use case exactly once and pass correct id`() = runTest(testDispatcher) {
+    fun `getMovieDetail should invoke use case exactly once and pass correct id`() = runTest {
         // arrange
         val expected = createDefaultMovie()
         val useCase = FakeGetMovieDetailsUseCase(movie = expected)
@@ -93,32 +80,22 @@ class DetailViewModelTest {
         // act
         viewModel.getMovieDetail(42)
 
-        advanceUntilIdle()
-
         // assert
         assertEquals(1, useCase.invocations)
         assertEquals(42, useCase.lastRequestedId)
     }
 
     @Test
-    fun `getMovieDetail should end with null movie when use case returns null`() = runTest(testDispatcher) {
+    fun `getMovieDetail should end with null movie when use case returns null`() = runTest {
         // arrange
         val useCase = FakeGetMovieDetailsUseCase(movie = null)
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailViewModel.MovieDetailUiState>()
 
-        val collectJob = launch {
-            viewModel.movieDetailStateFlow.collect { states.add(it) }
-        }
-
-        advanceUntilIdle()
+        testScope.launch { viewModel.movieDetailStateFlow.collect { states.add(it) } }
 
         // act
         viewModel.getMovieDetail(7)
-
-        advanceUntilIdle()
-
-        collectJob.cancel()
 
         // assert
         assertTrue(states.isNotEmpty())
@@ -127,23 +104,16 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun `getMovieDetail should emit loading true state before emitting movie`() = runTest(testDispatcher) {
+    fun `getMovieDetail should emit loading true state before emitting movie`() = runTest {
         // arrange
         val useCase = FakeGetMovieDetailsUseCase(movie = createDefaultMovie())
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailViewModel.MovieDetailUiState>()
 
-        val collectJob = launch {
-            viewModel.movieDetailStateFlow.collect { states.add(it) }
-        }
-
-        advanceUntilIdle()
+        testScope.launch { viewModel.movieDetailStateFlow.collect { states.add(it) } }
 
         // act
         viewModel.getMovieDetail(1)
-        
-        advanceUntilIdle()
-        collectJob.cancel()
 
         // assert
         assertTrue(states.size >= 2)

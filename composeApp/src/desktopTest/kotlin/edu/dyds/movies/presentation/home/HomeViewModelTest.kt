@@ -3,11 +3,11 @@ package edu.dyds.movies.presentation.home
 import edu.dyds.movies.domain.entities.Movie
 import edu.dyds.movies.domain.entities.QualifiedMovie
 import edu.dyds.movies.presentation.fakes.FakeGetPopularMoviesUseCase
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -20,7 +20,8 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class TestHomeViewModel {
 
-    private val testDispatcher = StandardTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = CoroutineScope(testDispatcher)
 
     @Before
     fun setup() {
@@ -33,24 +34,16 @@ class TestHomeViewModel {
     }
 
     @Test
-    fun `getAllMovies should end with loading false after invocation`() = runTest(testDispatcher) {
+    fun `getAllMovies should end with loading false after invocation`() = runTest {
         // arrange
         val useCase = FakeGetPopularMoviesUseCase()
         val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeViewModel.MoviesUiState>()
 
-        val collectJob = launch {
-            viewModel.moviesStateFlow.collect { states.add(it) }
-        }
-
-        advanceUntilIdle()
+        testScope.launch { viewModel.moviesStateFlow.collect { states.add(it) } }
 
         // act
         viewModel.getAllMovies()
-
-        advanceUntilIdle()
-
-        collectJob.cancel()
 
         // assert
         assertTrue(states.isNotEmpty())
@@ -58,25 +51,17 @@ class TestHomeViewModel {
     }
 
     @Test
-    fun `getAllMovies should emit use case movies in final state`() = runTest(testDispatcher) {
+    fun `getAllMovies should emit use case movies in final state`() = runTest {
         // arrange
         val movie = createDefaultQualifiedMovie()
         val useCase = FakeGetPopularMoviesUseCase(movies = listOf(movie))
         val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeViewModel.MoviesUiState>()
 
-        val collectJob = launch {
-            viewModel.moviesStateFlow.collect { states.add(it) }
-        }
-
-        advanceUntilIdle()
+        testScope.launch { viewModel.moviesStateFlow.collect { states.add(it) } }
 
         // act
         viewModel.getAllMovies()
-
-        advanceUntilIdle()
-
-        collectJob.cancel()
 
         // assert
         assertTrue(states.isNotEmpty())
@@ -84,7 +69,7 @@ class TestHomeViewModel {
     }
 
     @Test
-    fun `getAllMovies should invoke use case exactly once`() = runTest(testDispatcher) {
+    fun `getAllMovies should invoke use case exactly once`() = runTest {
         // arrange
         val useCase = FakeGetPopularMoviesUseCase()
         val viewModel = HomeViewModel(useCase)
@@ -92,14 +77,12 @@ class TestHomeViewModel {
         // act
         viewModel.getAllMovies()
 
-        advanceUntilIdle()
-
         // assert
         assertEquals(1, useCase.invocations)
     }
 
     @Test
-    fun `getAllMovies should emit multiple movies in final state`() = runTest(testDispatcher) {
+    fun `getAllMovies should emit multiple movies in final state`() = runTest {
         // arrange
         val movies = listOf(
             createDefaultQualifiedMovie(id = 1, title = "Movie 1"),
@@ -110,18 +93,10 @@ class TestHomeViewModel {
         val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeViewModel.MoviesUiState>()
 
-        val collectJob = launch {
-            viewModel.moviesStateFlow.collect { states.add(it) }
-        }
-
-        advanceUntilIdle()
+        testScope.launch { viewModel.moviesStateFlow.collect { states.add(it) } }
 
         // act
         viewModel.getAllMovies()
-
-        advanceUntilIdle()
-
-        collectJob.cancel()
 
         // assert
         assertTrue(states.isNotEmpty())
@@ -129,24 +104,16 @@ class TestHomeViewModel {
     }
 
     @Test
-    fun `getAllMovies should emit empty list when use case returns empty`() = runTest(testDispatcher) {
+    fun `getAllMovies should emit empty list when use case returns empty`() = runTest {
         // arrange
         val useCase = FakeGetPopularMoviesUseCase(movies = emptyList())
         val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeViewModel.MoviesUiState>()
 
-        val collectJob = launch {
-            viewModel.moviesStateFlow.collect { states.add(it) }
-        }
-
-        advanceUntilIdle()
+        testScope.launch { viewModel.moviesStateFlow.collect { states.add(it) } }
 
         // act
         viewModel.getAllMovies()
-
-        advanceUntilIdle()
-
-        collectJob.cancel()
 
         // assert
         assertTrue(states.isNotEmpty())
@@ -154,23 +121,16 @@ class TestHomeViewModel {
     }
 
     @Test
-    fun `getAllMovies should emit loading true state before emitting movies`() = runTest(testDispatcher) {
+    fun `getAllMovies should emit loading true state before emitting movies`() = runTest {
         // arrange
         val useCase = FakeGetPopularMoviesUseCase(movies = listOf(createDefaultQualifiedMovie()))
         val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeViewModel.MoviesUiState>()
 
-        val collectJob = launch {
-            viewModel.moviesStateFlow.collect { states.add(it) }
-        }
-
-        advanceUntilIdle()
+        testScope.launch { viewModel.moviesStateFlow.collect { states.add(it) } }
 
         // act
         viewModel.getAllMovies()
-        
-        advanceUntilIdle()
-        collectJob.cancel()
 
         // assert
         assertTrue(states.size >= 2)
@@ -180,20 +140,14 @@ class TestHomeViewModel {
     }
 
     @Test
-    fun `initial state has loading false and empty movies`() = runTest(testDispatcher) {
+    fun `initial state has loading false and empty movies`() = runTest {
         // arrange
         val useCase = FakeGetPopularMoviesUseCase()
         val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeViewModel.MoviesUiState>()
 
-        val collectJob = launch {
-            viewModel.moviesStateFlow.collect { states.add(it) }
-        }
-
         // act
-        advanceUntilIdle()
-
-        collectJob.cancel()
+        testScope.launch { viewModel.moviesStateFlow.collect { states.add(it) } }
 
         // assert
         assertEquals(1, states.size)
