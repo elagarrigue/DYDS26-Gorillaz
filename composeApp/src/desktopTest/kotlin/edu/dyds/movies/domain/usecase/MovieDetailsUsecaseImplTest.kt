@@ -39,15 +39,17 @@ class TestMovieDetailsUsecaseImpl {
     @Test
     fun `invoke should request repository with provided id and only once`() = runTest {
         // arrange
-        val repository = FakeMoviesRepository(movieToReturn = createMovie())
+        val expectedMovie = createMovie(id = 42, title = "Test")
+        val repository = FakeMoviesRepository(movieToReturn = expectedMovie)
         val useCase = GetMovieDetailsUseCaseImpl(repository)
 
         // act
-        useCase(42)
+        val result = useCase(42)
 
         // assert
         assertEquals(1, repository.getMovieDetailsInvocations)
         assertEquals(42, repository.lastRequestedId)
+        assertEquals(expectedMovie, result)
     }
 
     private fun createMovie(

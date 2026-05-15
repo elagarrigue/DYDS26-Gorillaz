@@ -133,14 +133,18 @@ class TestPopularMoviesUseCaseImpl {
     @Test
     fun `invoke should invoke repository exactly once`() = runTest {
         // arrange
-        val repository = FakeMoviesRepository(moviesToReturn = emptyList())
+        val mockMovie = createMovie(id = 1, voteAverage = 7.5)
+        val repository = FakeMoviesRepository(moviesToReturn = listOf(mockMovie))
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
         // act
-        useCase()
+        val result = useCase()
 
         // assert
         assertEquals(1, repository.getPopularMoviesInvocations)
+        assertEquals(1, result.size)
+        assertEquals(mockMovie, result[0].movie)
+        assertEquals(true, result[0].isGoodMovie)
     }
 
     @Test
