@@ -2,7 +2,7 @@ package edu.dyds.movies.domain.usecase
 
 import edu.dyds.movies.domain.entities.Movie
 import edu.dyds.movies.domain.entities.QualifiedMovie
-import edu.dyds.movies.domain.repository.MoviesRepository
+import edu.dyds.movies.domain.fakes.FakeMoviesRepository
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -10,25 +10,10 @@ import kotlin.test.assertTrue
 
 class TestPopularMoviesUseCaseImpl {
 
-    private class MoviesRepositoryFake(
-        private val moviesToReturn: List<Movie> = emptyList()
-    ) : MoviesRepository {
-        var getPopularMoviesInvocations = 0
-
-        override suspend fun getPopularMovies(): List<Movie> {
-            getPopularMoviesInvocations++
-            return moviesToReturn
-        }
-
-        override suspend fun getMovieDetails(id: Int): Movie? {
-            return null
-        }
-    }
-
     @Test
     fun `invoke should return empty list when repository returns empty`() = runTest {
         // arrange
-        val repository = MoviesRepositoryFake(moviesToReturn = emptyList())
+        val repository = FakeMoviesRepository(moviesToReturn = emptyList())
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
         // act
@@ -42,7 +27,7 @@ class TestPopularMoviesUseCaseImpl {
     fun `invoke should handle single movie list correctly`() = runTest {
         // arrange
         val movie = createMovie(id = 1, voteAverage = 7.5)
-        val repository = MoviesRepositoryFake(moviesToReturn = listOf(movie))
+        val repository = FakeMoviesRepository(moviesToReturn = listOf(movie))
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
         // act
@@ -62,7 +47,7 @@ class TestPopularMoviesUseCaseImpl {
             createMovie(id = 2, title = "Movie 2", voteAverage = 8.5),
             createMovie(id = 3, title = "Movie 3", voteAverage = 7.0)
         )
-        val repository = MoviesRepositoryFake(moviesToReturn = movies)
+        val repository = FakeMoviesRepository(moviesToReturn = movies)
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
         // act
@@ -82,7 +67,7 @@ class TestPopularMoviesUseCaseImpl {
             createMovie(id = 2, voteAverage = 7.5),
             createMovie(id = 3, voteAverage = 9.9)
         )
-        val repository = MoviesRepositoryFake(moviesToReturn = movies)
+        val repository = FakeMoviesRepository(moviesToReturn = movies)
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
         // act
@@ -100,7 +85,7 @@ class TestPopularMoviesUseCaseImpl {
             createMovie(id = 2, voteAverage = 3.0),
             createMovie(id = 3, voteAverage = 0.1)
         )
-        val repository = MoviesRepositoryFake(moviesToReturn = movies)
+        val repository = FakeMoviesRepository(moviesToReturn = movies)
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
         // act
@@ -115,7 +100,7 @@ class TestPopularMoviesUseCaseImpl {
         // arrange
         val goodMovie = createMovie(id = 1, voteAverage = 6.0)
         val badMovie = createMovie(id = 2, voteAverage = 5.999)
-        val repository = MoviesRepositoryFake(moviesToReturn = listOf(goodMovie, badMovie))
+        val repository = FakeMoviesRepository(moviesToReturn = listOf(goodMovie, badMovie))
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
         // act
@@ -134,7 +119,7 @@ class TestPopularMoviesUseCaseImpl {
             createMovie(id = 2, title = "Movie 2", voteAverage = 5.0),
             createMovie(id = 3, title = "Movie 3", voteAverage = 7.0)
         )
-        val repository = MoviesRepositoryFake(moviesToReturn = movies)
+        val repository = FakeMoviesRepository(moviesToReturn = movies)
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
         // act
@@ -148,7 +133,7 @@ class TestPopularMoviesUseCaseImpl {
     @Test
     fun `invoke should invoke repository exactly once`() = runTest {
         // arrange
-        val repository = MoviesRepositoryFake(moviesToReturn = emptyList())
+        val repository = FakeMoviesRepository(moviesToReturn = emptyList())
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
         // act
@@ -173,7 +158,7 @@ class TestPopularMoviesUseCaseImpl {
             popularity = 15.5,
             voteAverage = 8.8
         )
-        val repository = MoviesRepositoryFake(moviesToReturn = listOf(originalMovie))
+        val repository = FakeMoviesRepository(moviesToReturn = listOf(originalMovie))
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
         // act

@@ -1,7 +1,7 @@
 package edu.dyds.movies.presentation.detail
 
 import edu.dyds.movies.domain.entities.Movie
-import edu.dyds.movies.domain.usecase.GetMovieDetailsUseCase
+import edu.dyds.movies.presentation.fakes.FakeGetMovieDetailsUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -33,24 +33,10 @@ class DetailViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private class GetMovieDetailsUseCaseFake(
-        private val movie: Movie? = null
-    ) : GetMovieDetailsUseCase {
-        var invocations = 0
-        var lastRequestedId: Int? = null
-
-        override suspend fun invoke(id: Int): Movie? {
-            invocations++
-            lastRequestedId = id
-            kotlinx.coroutines.yield()
-            return movie
-        }
-    }
-
     @Test
     fun `initial state has loading false and null movie`() = runTest(testDispatcher) {
         // arrange
-        val useCase = GetMovieDetailsUseCaseFake()
+        val useCase = FakeGetMovieDetailsUseCase()
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailViewModel.MovieDetailUiState>()
 
@@ -73,7 +59,7 @@ class DetailViewModelTest {
     fun `getMovieDetail should end with loading false and movie`() = runTest(testDispatcher) {
         // arrange
         val expected = createDefaultMovie(id = 42, title = "The Answer")
-        val useCase = GetMovieDetailsUseCaseFake(movie = expected)
+        val useCase = FakeGetMovieDetailsUseCase(movie = expected)
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailViewModel.MovieDetailUiState>()
 
@@ -101,7 +87,7 @@ class DetailViewModelTest {
     fun `getMovieDetail should invoke use case exactly once and pass correct id`() = runTest(testDispatcher) {
         // arrange
         val expected = createDefaultMovie()
-        val useCase = GetMovieDetailsUseCaseFake(movie = expected)
+        val useCase = FakeGetMovieDetailsUseCase(movie = expected)
         val viewModel = DetailViewModel(useCase)
 
         // act
@@ -117,7 +103,7 @@ class DetailViewModelTest {
     @Test
     fun `getMovieDetail should end with null movie when use case returns null`() = runTest(testDispatcher) {
         // arrange
-        val useCase = GetMovieDetailsUseCaseFake(movie = null)
+        val useCase = FakeGetMovieDetailsUseCase(movie = null)
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailViewModel.MovieDetailUiState>()
 
@@ -143,7 +129,7 @@ class DetailViewModelTest {
     @Test
     fun `getMovieDetail should emit loading true state before emitting movie`() = runTest(testDispatcher) {
         // arrange
-        val useCase = GetMovieDetailsUseCaseFake(movie = createDefaultMovie())
+        val useCase = FakeGetMovieDetailsUseCase(movie = createDefaultMovie())
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailViewModel.MovieDetailUiState>()
 

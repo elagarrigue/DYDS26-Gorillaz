@@ -2,7 +2,7 @@ package edu.dyds.movies.presentation.home
 
 import edu.dyds.movies.domain.entities.Movie
 import edu.dyds.movies.domain.entities.QualifiedMovie
-import edu.dyds.movies.domain.usecase.GetPopularMoviesUseCase
+import edu.dyds.movies.presentation.fakes.FakeGetPopularMoviesUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -32,22 +32,10 @@ class TestHomeViewModel {
         Dispatchers.resetMain()
     }
 
-    private class GetPopularMoviesUseCaseFake(
-        private val movies: List<QualifiedMovie> = emptyList()
-    ) : GetPopularMoviesUseCase {
-        var invocations = 0
-
-        override suspend fun invoke(): List<QualifiedMovie> {
-            invocations++
-            kotlinx.coroutines.yield()
-            return movies
-        }
-    }
-
     @Test
     fun `getAllMovies should end with loading false after invocation`() = runTest(testDispatcher) {
         // arrange
-        val useCase = GetPopularMoviesUseCaseFake()
+        val useCase = FakeGetPopularMoviesUseCase()
         val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeViewModel.MoviesUiState>()
 
@@ -73,7 +61,7 @@ class TestHomeViewModel {
     fun `getAllMovies should emit use case movies in final state`() = runTest(testDispatcher) {
         // arrange
         val movie = createDefaultQualifiedMovie()
-        val useCase = GetPopularMoviesUseCaseFake(movies = listOf(movie))
+        val useCase = FakeGetPopularMoviesUseCase(movies = listOf(movie))
         val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeViewModel.MoviesUiState>()
 
@@ -98,7 +86,7 @@ class TestHomeViewModel {
     @Test
     fun `getAllMovies should invoke use case exactly once`() = runTest(testDispatcher) {
         // arrange
-        val useCase = GetPopularMoviesUseCaseFake()
+        val useCase = FakeGetPopularMoviesUseCase()
         val viewModel = HomeViewModel(useCase)
 
         // act
@@ -118,7 +106,7 @@ class TestHomeViewModel {
             createDefaultQualifiedMovie(id = 2, title = "Movie 2"),
             createDefaultQualifiedMovie(id = 3, title = "Movie 3")
         )
-        val useCase = GetPopularMoviesUseCaseFake(movies = movies)
+        val useCase = FakeGetPopularMoviesUseCase(movies = movies)
         val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeViewModel.MoviesUiState>()
 
@@ -143,7 +131,7 @@ class TestHomeViewModel {
     @Test
     fun `getAllMovies should emit empty list when use case returns empty`() = runTest(testDispatcher) {
         // arrange
-        val useCase = GetPopularMoviesUseCaseFake(movies = emptyList())
+        val useCase = FakeGetPopularMoviesUseCase(movies = emptyList())
         val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeViewModel.MoviesUiState>()
 
@@ -168,7 +156,7 @@ class TestHomeViewModel {
     @Test
     fun `getAllMovies should emit loading true state before emitting movies`() = runTest(testDispatcher) {
         // arrange
-        val useCase = GetPopularMoviesUseCaseFake(movies = listOf(createDefaultQualifiedMovie()))
+        val useCase = FakeGetPopularMoviesUseCase(movies = listOf(createDefaultQualifiedMovie()))
         val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeViewModel.MoviesUiState>()
 
@@ -194,7 +182,7 @@ class TestHomeViewModel {
     @Test
     fun `initial state has loading false and empty movies`() = runTest(testDispatcher) {
         // arrange
-        val useCase = GetPopularMoviesUseCaseFake()
+        val useCase = FakeGetPopularMoviesUseCase()
         val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeViewModel.MoviesUiState>()
 

@@ -1,7 +1,7 @@
 package edu.dyds.movies.domain.usecase
 
 import edu.dyds.movies.domain.entities.Movie
-import edu.dyds.movies.domain.repository.MoviesRepository
+import edu.dyds.movies.domain.fakes.FakeMoviesRepository
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -9,28 +9,11 @@ import kotlin.test.assertNull
 
 class TestMovieDetailsUsecaseImpl {
 
-    private class MoviesRepositoryFake(
-        private val movieToReturn: Movie? = null
-    ) : MoviesRepository {
-        var getMovieDetailsInvocations = 0
-        var lastRequestedId: Int? = null
-
-        override suspend fun getPopularMovies(): List<Movie> {
-            return emptyList()
-        }
-
-        override suspend fun getMovieDetails(id: Int): Movie? {
-            getMovieDetailsInvocations++
-            lastRequestedId = id
-            return movieToReturn
-        }
-    }
-
     @Test
     fun `invoke should return movie from repository`() = runTest {
         // arrange
         val expectedMovie = createMovie(id = 10, title = "Inception")
-        val repository = MoviesRepositoryFake(movieToReturn = expectedMovie)
+        val repository = FakeMoviesRepository(movieToReturn = expectedMovie)
         val useCase = GetMovieDetailsUseCaseImpl(repository)
 
         // act
@@ -43,7 +26,7 @@ class TestMovieDetailsUsecaseImpl {
     @Test
     fun `invoke should return null when repository has no movie`() = runTest {
         // arrange
-        val repository = MoviesRepositoryFake(movieToReturn = null)
+        val repository = FakeMoviesRepository(movieToReturn = null)
         val useCase = GetMovieDetailsUseCaseImpl(repository)
 
         // act
@@ -56,7 +39,7 @@ class TestMovieDetailsUsecaseImpl {
     @Test
     fun `invoke should request repository with provided id and only once`() = runTest {
         // arrange
-        val repository = MoviesRepositoryFake(movieToReturn = createMovie())
+        val repository = FakeMoviesRepository(movieToReturn = createMovie())
         val useCase = GetMovieDetailsUseCaseImpl(repository)
 
         // act
