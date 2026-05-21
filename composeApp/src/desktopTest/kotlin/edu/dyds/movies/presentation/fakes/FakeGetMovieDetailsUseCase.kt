@@ -7,11 +7,11 @@ class FakeGetMovieDetailsUseCase(
     private val movie: Movie? = null
 ) : GetMovieDetailsUseCase {
     var invocations = 0
-    var lastRequestedId: Int? = null
+    var lastRequestedTitle: String? = null
 
-    override suspend fun invoke(id: Int): Movie? {
+    override suspend fun invoke(title: String): Movie? {
         invocations++
-        lastRequestedId = id
+        lastRequestedTitle = title
         kotlinx.coroutines.yield()
         return movie
     }

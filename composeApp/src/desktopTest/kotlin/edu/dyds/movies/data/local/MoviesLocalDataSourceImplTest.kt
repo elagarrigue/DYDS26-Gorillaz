@@ -109,14 +109,15 @@ class MoviesLocalDataSourceImplTest {
             createMovie(id = 2, title = "Original 2")
         )
         localDataSource.saveMovies(originalMovies)
-        val exposedMovies = localDataSource.getCachedMovies() as MutableList<Movie>
+        val exposedMovies = localDataSource.getCachedMovies()
 
         // act
-        exposedMovies.clear()
+        localDataSource.saveMovies(listOf(createMovie(id = 3, title = "New Movie")))
 
         // assert
         val cachedMovies = localDataSource.getCachedMovies()
-        assertEquals(originalMovies, cachedMovies)
+        assertEquals(originalMovies, exposedMovies)
+        assertEquals(listOf(createMovie(id = 3, title = "New Movie")), cachedMovies)
     }
 
     @Test

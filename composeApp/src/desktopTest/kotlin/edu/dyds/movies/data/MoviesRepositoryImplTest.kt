@@ -131,6 +131,52 @@ class MoviesRepositoryImplTest {
         assertNotNull(result)
         assertEquals(42, result.id)
         assertEquals("Movie 42", result.title)
+        assertEquals(1, remote.getMovieByTitleInvocations)
+        assertEquals("Movie 42", remote.lastQueriedTitle)
+    }
+
+    @Test
+    fun `getMovieDetails - when remote succeeds - applies URL mapping to images`() = runTest {
+        // arrange
+        val remote = FakeMoviesRemoteDataSource().apply {
+            movieDetailsReturn = buildRemoteMovie(1).copy(
+                posterPath = "/detail_poster.jpg",
+                backdropPath = "/detail_backdrop.jpg"
+            )
+        }
+        val local = FakeMoviesLocalDataSource()
+        val repository = MoviesRepositoryImpl(remote, local)
+
+        // act
+        val result = repository.getMovieDetails("Movie 1")
+
+        // assert
+        assertNotNull(result)
+        assertEquals("https://image.tmdb.org/t/p/w185/detail_poster.jpg", result.poster)
+        assertEquals("https://image.tmdb.org/t/p/w780/detail_backdrop.jpg", result.backdrop)
+    }
+
+    @Test
+    fun `getMovieDetails - when remote succeeds - applies defaults for nullable fields`() = runTest {
+        // arrange
+        val remote = FakeMoviesRemoteDataSource().apply {
+            movieDetailsReturn = buildRemoteMovie(1).copy(
+                releaseDate = null,
+                popularity = null,
+                voteAverage = null
+            )
+        }
+        val local = FakeMoviesLocalDataSource()
+        val repository = MoviesRepositoryImpl(remote, local)
+
+        // act
+        val result = repository.getMovieDetails("Movie 1")
+
+        // assert
+        assertNotNull(result)
+        assertEquals("", result.releaseDate)
+        assertEquals(0.0, result.popularity)
+        assertEquals(0.0, result.voteAverage)
     }
 
     @Test
