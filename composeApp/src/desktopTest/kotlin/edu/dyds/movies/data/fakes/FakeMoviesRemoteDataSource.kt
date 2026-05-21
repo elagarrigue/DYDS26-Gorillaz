@@ -20,4 +20,9 @@ class FakeMoviesRemoteDataSource : MoviesRemoteDataSource {
         if (shouldThrow) throw Exception("Network error")
         return movieDetailsReturn ?: throw Exception("Not found")
     }
+
+    override suspend fun getMovieByTitle(title: String): RemoteMovie {
+        if (shouldThrow) throw Exception("Network error")
+        return movieDetailsReturn ?: throw Exception("Not found")
+    }
 }

@@ -42,7 +42,7 @@ private fun NavGraphBuilder.homeDestination(
         HomeScreen(
             viewModel = getHomeViewModel(),
             onGoodMovieClick = {
-                navController.navigate("$DETAIL/${it.id}")
+                navController.navigate("$DETAIL/${it.title}")
             }
         )
     }
@@ -54,11 +54,11 @@ private fun NavGraphBuilder.detailDestination(
 ) {
     composable(
         route = "$DETAIL/{$MOVIE_ID}",
-        arguments = listOf(navArgument(MOVIE_ID) { type = NavType.IntType })
+        arguments = listOf(navArgument(MOVIE_ID) { type = NavType.StringType })
     ) { backstackEntry ->
-        val movieId = backstackEntry.arguments?.getInt(MOVIE_ID)
+        val movieTitle = backstackEntry.arguments?.getString(MOVIE_ID)
 
-        movieId?.let {
+        movieTitle?.let {
             DetailScreen(getDetailViewModel(), it, onBack = { navController.popBackStack() })
         }
     }

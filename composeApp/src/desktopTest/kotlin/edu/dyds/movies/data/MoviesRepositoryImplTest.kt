@@ -125,7 +125,7 @@ class MoviesRepositoryImplTest {
         val repository = MoviesRepositoryImpl(remote, local)
 
         // act
-        val result = repository.getMovieDetails(42)
+        val result = repository.getMovieDetails("Movie 42")
 
         // assert
         assertNotNull(result)
@@ -141,7 +141,7 @@ class MoviesRepositoryImplTest {
         val repository = MoviesRepositoryImpl(remote, local)
 
         // act
-        val result = repository.getMovieDetails(1)
+        val result = repository.getMovieDetails("Movie 1")
 
         // assert
         assertNull(result)
