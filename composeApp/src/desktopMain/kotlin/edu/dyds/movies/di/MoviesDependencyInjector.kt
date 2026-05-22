@@ -2,11 +2,13 @@ package edu.dyds.movies.di
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
-import edu.dyds.movies.data.local.MoviesLocalDataSourceImpl
-import edu.dyds.movies.data.local.MoviesLocalDataSource
-import edu.dyds.movies.data.remote.MoviesRemoteDataSource
 import edu.dyds.movies.data.MoviesRepositoryImpl
+import edu.dyds.movies.data.external.MovieExternalSource
+import edu.dyds.movies.data.external.MoviesExternalSource
+import edu.dyds.movies.data.external.omdb.OMDBMoviesExternalSource
 import edu.dyds.movies.data.external.tmdb.TMDBMoviesExternalSource
+import edu.dyds.movies.data.local.MoviesLocalDataSource
+import edu.dyds.movies.data.local.MoviesLocalDataSourceImpl
 import edu.dyds.movies.domain.repository.MoviesRepository
 import edu.dyds.movies.domain.usecase.GetMovieDetailsUseCase
 import edu.dyds.movies.domain.usecase.GetMovieDetailsUseCaseImpl
@@ -21,7 +23,8 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
-private const val API_KEY = "d18da1b5da16397619c688b0263cd281"
+private const val TMDB_API_KEY = "d18da1b5da16397619c688b0263cd281"
+private const val OMDB_API_KEY = "a96e7f78"
 
 object MoviesDependencyInjector {
 
@@ -36,7 +39,7 @@ object MoviesDependencyInjector {
                 url {
                     protocol = URLProtocol.HTTPS
                     host = "api.themoviedb.org"
-                    parameters.append("api_key", API_KEY)
+                    parameters.append("api_key", TMDB_API_KEY)
                 }
             }
             install(HttpTimeout) {
@@ -44,9 +47,29 @@ object MoviesDependencyInjector {
             }
         }
 
-    private val remoteDataSource: MoviesRemoteDataSource by lazy { TMDBMoviesExternalSource(tmdbHttpClient) }
+    private val omdbHttpClient =
+        HttpClient {
+            install(ContentNegotiation) {
+                json(Json {
+                    ignoreUnknownKeys = true
+                })
+            }
+            install(DefaultRequest) {
+                url {
+                    protocol = URLProtocol.HTTPS
+                    host = "www.omdbapi.com"
+                    parameters.append("apikey", OMDB_API_KEY)
+                }
+            }
+            install(HttpTimeout) {
+                requestTimeoutMillis = 5000
+            }
+        }
+
+    private val moviesExternalSource: MoviesExternalSource by lazy { TMDBMoviesExternalSource(tmdbHttpClient) }
+    private val movieExternalSource: MovieExternalSource by lazy { OMDBMoviesExternalSource(omdbHttpClient) }
     private val localDataSource: MoviesLocalDataSource by lazy { MoviesLocalDataSourceImpl() }
-    private val moviesRepository: MoviesRepository by lazy { MoviesRepositoryImpl(remoteDataSource, localDataSource) }
+    private val moviesRepository: MoviesRepository by lazy { MoviesRepositoryImpl(moviesExternalSource, movieExternalSource, localDataSource) }
     private val getPopularMoviesUseCase: GetPopularMoviesUseCase by lazy { GetPopularMoviesUseCaseImpl(moviesRepository) }
     private val getMovieDetailsUseCase: GetMovieDetailsUseCase by lazy { GetMovieDetailsUseCaseImpl(moviesRepository) }
 

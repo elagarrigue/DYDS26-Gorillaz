@@ -4,31 +4,8 @@ import edu.dyds.movies.data.external.MovieExternalSource
 import edu.dyds.movies.domain.entities.Movie
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-
-private val omdbHttpClient = HttpClient {
-    install(ContentNegotiation) {
-        json(Json {
-            ignoreUnknownKeys = true
-        })
-    }
-    install(DefaultRequest) {
-        url {
-            protocol = URLProtocol.HTTPS
-            host = "www.omdbapi.com"
-            parameters.append("apikey", "a96e7f78")
-        }
-    }
-    install(HttpTimeout) {
-        requestTimeoutMillis = 5000
-    }
-}
 
 @Serializable
 data class RemoteMovie(
