@@ -1,8 +1,8 @@
 package edu.dyds.movies.data.fakes
 
 import edu.dyds.movies.data.remote.MoviesRemoteDataSource
-import edu.dyds.movies.data.remote.RemoteMovie
-import edu.dyds.movies.data.remote.RemoteResult
+import edu.dyds.movies.data.external.tmdb.RemoteMovie
+import edu.dyds.movies.data.external.tmdb.RemoteResult
 
 class FakeMoviesRemoteDataSource : MoviesRemoteDataSource {
     var popularMoviesReturn: RemoteResult = RemoteResult(1, emptyList(), 0, 0)

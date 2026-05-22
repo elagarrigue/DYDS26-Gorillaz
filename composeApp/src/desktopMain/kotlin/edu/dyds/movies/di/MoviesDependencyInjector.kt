@@ -6,7 +6,7 @@ import edu.dyds.movies.data.local.MoviesLocalDataSourceImpl
 import edu.dyds.movies.data.local.MoviesLocalDataSource
 import edu.dyds.movies.data.remote.MoviesRemoteDataSource
 import edu.dyds.movies.data.MoviesRepositoryImpl
-import edu.dyds.movies.data.remote.MoviesRemoteDataSourceImpl
+import edu.dyds.movies.data.external.tmdb.TMDBMoviesExternalSource
 import edu.dyds.movies.domain.repository.MoviesRepository
 import edu.dyds.movies.domain.usecase.GetMovieDetailsUseCase
 import edu.dyds.movies.domain.usecase.GetMovieDetailsUseCaseImpl
@@ -44,7 +44,7 @@ object MoviesDependencyInjector {
             }
         }
 
-    private val remoteDataSource: MoviesRemoteDataSource by lazy { MoviesRemoteDataSourceImpl(tmdbHttpClient) }
+    private val remoteDataSource: MoviesRemoteDataSource by lazy { TMDBMoviesExternalSource(tmdbHttpClient) }
     private val localDataSource: MoviesLocalDataSource by lazy { MoviesLocalDataSourceImpl() }
     private val moviesRepository: MoviesRepository by lazy { MoviesRepositoryImpl(remoteDataSource, localDataSource) }
     private val getPopularMoviesUseCase: GetPopularMoviesUseCase by lazy { GetPopularMoviesUseCaseImpl(moviesRepository) }

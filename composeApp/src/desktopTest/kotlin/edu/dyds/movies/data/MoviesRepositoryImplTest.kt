@@ -2,8 +2,8 @@ package edu.dyds.movies.data
 
 import edu.dyds.movies.data.fakes.FakeMoviesLocalDataSource
 import edu.dyds.movies.data.fakes.FakeMoviesRemoteDataSource
-import edu.dyds.movies.data.remote.RemoteMovie
-import edu.dyds.movies.data.remote.RemoteResult
+import edu.dyds.movies.data.external.tmdb.RemoteMovie
+import edu.dyds.movies.data.external.tmdb.RemoteResult
 import edu.dyds.movies.domain.entities.Movie
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
