@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.dyds.movies.data.MoviesRepositoryImpl
 import edu.dyds.movies.data.external.MovieExternalSource
+import edu.dyds.movies.data.external.MovieExternalSourceBroker
 import edu.dyds.movies.data.external.MoviesExternalSource
 import edu.dyds.movies.data.external.omdb.OMDBMoviesExternalSource
 import edu.dyds.movies.data.external.tmdb.TMDBMoviesExternalSource
@@ -66,8 +67,11 @@ object MoviesDependencyInjector {
             }
         }
 
-    private val moviesExternalSource: MoviesExternalSource by lazy { TMDBMoviesExternalSource(tmdbHttpClient) }
-    private val movieExternalSource: MovieExternalSource by lazy { OMDBMoviesExternalSource(omdbHttpClient) }
+    private val tmdbMoviesExternalSource: TMDBMoviesExternalSource by lazy { TMDBMoviesExternalSource(tmdbHttpClient) }
+    private val moviesExternalSource: MoviesExternalSource by lazy { tmdbMoviesExternalSource }
+    private val movieExternalSource: MovieExternalSource by lazy {
+        MovieExternalSourceBroker(tmdbMoviesExternalSource, OMDBMoviesExternalSource(omdbHttpClient))
+    }
     private val localDataSource: MoviesLocalDataSource by lazy { MoviesLocalDataSourceImpl() }
     private val moviesRepository: MoviesRepository by lazy { MoviesRepositoryImpl(moviesExternalSource, movieExternalSource, localDataSource) }
     private val getPopularMoviesUseCase: GetPopularMoviesUseCase by lazy { GetPopularMoviesUseCaseImpl(moviesRepository) }

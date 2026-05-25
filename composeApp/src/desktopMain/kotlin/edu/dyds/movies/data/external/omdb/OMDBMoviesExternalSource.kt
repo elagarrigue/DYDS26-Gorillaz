@@ -32,8 +32,8 @@ fun RemoteMovie.toDomainMovie(): Movie.MovieItem = Movie.MovieItem(
     voteAverage = if (Metascore.isNotEmpty() && Metascore != "N/A") Metascore.toDoubleOrNull() ?: 0.0 else 0.0
 )
 
-internal class OMDBMoviesExternalSource(private val omdbHttpClient: HttpClient) : MovieExternalSource {
+internal open class OMDBMoviesExternalSource(private val omdbHttpClient: HttpClient) : MovieExternalSource {
 
-    override suspend fun getMovieByTitle(title: String): Movie.MovieItem =
+    open override suspend fun getMovieByTitle(title: String): Movie.MovieItem =
         omdbHttpClient.get("/?t=$title").body<RemoteMovie>().toDomainMovie()
 }

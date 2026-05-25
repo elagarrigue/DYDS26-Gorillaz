@@ -9,13 +9,19 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 private const val POPULAR_MOVIES_PATH = "/3/discover/movie?sort_by=popularity.desc"
+private const val SEARCH_MOVIE_PATH = "/3/search/movie"
 private const val POSTER_BASE_URL = "https://image.tmdb.org/t/p/w185"
 private const val BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w780"
 
-class TMDBMoviesExternalSource(private val tmdbHttpClient: HttpClient) : MoviesExternalSource {
+open class TMDBMoviesExternalSource(private val tmdbHttpClient: HttpClient) : MoviesExternalSource {
 
     override suspend fun getPopularMovies(): List<Movie.MovieItem> =
         tmdbHttpClient.get(POPULAR_MOVIES_PATH).body<RemoteResult>().results.map { it.toMovieItem() }
+
+    open suspend fun getMovieByTitle(title: String): Movie.MovieItem =
+        tmdbHttpClient.get(SEARCH_MOVIE_PATH) {
+            parameter("query", title)
+        }.body<RemoteResult>().results.first().toMovieItem()
 }
 
 @Serializable
