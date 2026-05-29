@@ -1,6 +1,6 @@
 package edu.dyds.movies.data.external.omdb
 
-import edu.dyds.movies.data.external.MovieDetailExternalSource
+import edu.dyds.movies.data.external.MovieExternalSource
 import edu.dyds.movies.domain.entities.Movie
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -32,8 +32,8 @@ fun RemoteMovie.toDomainMovie(): Movie.MovieItem = Movie.MovieItem(
     voteAverage = if (Metascore.isNotEmpty() && Metascore != "N/A") Metascore.toDoubleOrNull() ?: 0.0 else 0.0
 )
 
-internal open class OMDBMoviesExternalSource(private val omdbHttpClient: HttpClient) : MovieDetailExternalSource {
+internal class OMDBMoviesExternalSource(private val omdbHttpClient: HttpClient) : MovieExternalSource {
 
-    open override suspend fun getMovieByTitle(title: String): Movie.MovieItem? =
+    override suspend fun getMovieByTitle(title: String): Movie.MovieItem? =
         omdbHttpClient.get("/?t=$title").body<RemoteMovie>().toDomainMovie()
 }

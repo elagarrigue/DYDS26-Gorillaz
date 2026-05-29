@@ -1,19 +1,15 @@
 package edu.dyds.movies.data.external
 
-import edu.dyds.movies.data.external.omdb.OMDBMoviesExternalSource
-import edu.dyds.movies.data.external.tmdb.TMDBMoviesExternalSource
 import edu.dyds.movies.domain.entities.Movie
 
-internal class MovieDetailBroker(
-    private val tmdbSource: TMDBMoviesExternalSource,
-    private val omdbSource: OMDBMoviesExternalSource
-) : MovieDetailExternalSource {
+internal class MovieExternalSourceBroker(
+    private val tmdbSource: MovieExternalSource,
+    private val omdbSource: MovieExternalSource
+) : MovieExternalSource {
 
     override suspend fun getMovieByTitle(title: String): Movie.MovieItem? {
-        val tmdbResult = runCatching { tmdbSource.getMovieByTitle(title) }
-        val omdbResult = runCatching { omdbSource.getMovieByTitle(title) }
-        val tmdbMovie = tmdbResult.getOrNull()
-        val omdbMovie = omdbResult.getOrNull()
+        val tmdbMovie = runCatching { tmdbSource.getMovieByTitle(title) }.getOrNull()
+        val omdbMovie = runCatching { omdbSource.getMovieByTitle(title) }.getOrNull()
 
         return when {
             tmdbMovie != null && omdbMovie != null -> Movie.MovieItem(
