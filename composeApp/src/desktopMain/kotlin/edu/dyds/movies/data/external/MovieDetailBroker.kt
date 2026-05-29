@@ -9,7 +9,7 @@ internal class MovieDetailBroker(
     private val omdbSource: OMDBMoviesExternalSource
 ) : MovieDetailExternalSource {
 
-    override suspend fun getMovieByTitle(title: String): Movie.MovieItem {
+    override suspend fun getMovieByTitle(title: String): Movie.MovieItem? {
         val tmdbResult = runCatching { tmdbSource.getMovieByTitle(title) }
         val omdbResult = runCatching { omdbSource.getMovieByTitle(title) }
         val tmdbMovie = tmdbResult.getOrNull()
@@ -30,7 +30,7 @@ internal class MovieDetailBroker(
             )
             tmdbMovie != null -> tmdbMovie.copy(overview = "TMDB: ${tmdbMovie.overview}")
             omdbMovie != null -> omdbMovie.copy(overview = "OMDB: ${omdbMovie.overview}")
-            else -> throw IllegalStateException("No movie found for title: $title")
+            else -> null
         }
     }
 }

@@ -34,6 +34,6 @@ fun RemoteMovie.toDomainMovie(): Movie.MovieItem = Movie.MovieItem(
 
 internal open class OMDBMoviesExternalSource(private val omdbHttpClient: HttpClient) : MovieDetailExternalSource {
 
-    open override suspend fun getMovieByTitle(title: String): Movie.MovieItem =
+    open override suspend fun getMovieByTitle(title: String): Movie.MovieItem? =
         omdbHttpClient.get("/?t=$title").body<RemoteMovie>().toDomainMovie()
 }

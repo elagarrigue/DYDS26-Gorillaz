@@ -9,6 +9,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class OMDBMoviesExternalSourceTest {
 
@@ -46,6 +47,7 @@ class OMDBMoviesExternalSourceTest {
 
         val result = source.getMovieByTitle("Inception")
 
+        assertNotNull(result)
         assertEquals("Inception".hashCode(), result.id)
         assertEquals("Inception", result.title)
         assertEquals("A thief who steals corporate secrets.", result.overview)
@@ -76,6 +78,7 @@ class OMDBMoviesExternalSourceTest {
 
         val result = source.getMovieByTitle("Unknown")
 
+        assertNotNull(result)
         assertEquals(0.0, result.popularity)
         assertEquals(0.0, result.voteAverage)
     }
@@ -110,6 +113,8 @@ class OMDBMoviesExternalSourceTest {
         val resultNa = OMDBMoviesExternalSource(clientNa).getMovieByTitle("Old Movie")
         val resultEmpty = OMDBMoviesExternalSource(clientEmpty).getMovieByTitle("Old Movie")
 
+        assertNotNull(resultNa)
+        assertNotNull(resultEmpty)
         assertEquals("1990", resultNa.releaseDate)
         assertEquals("1990", resultEmpty.releaseDate)
     }
@@ -132,6 +137,7 @@ class OMDBMoviesExternalSourceTest {
 
         val result = source.getMovieByTitle("Recent Movie")
 
+        assertNotNull(result)
         assertEquals("15 Mar 2023", result.releaseDate)
     }
 }

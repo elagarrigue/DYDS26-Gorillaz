@@ -10,7 +10,8 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class MovieDetailBrokerTest {
 
@@ -47,6 +48,7 @@ class MovieDetailBrokerTest {
 
         val result = broker.getMovieByTitle("Movie")
 
+        assertNotNull(result)
         assertEquals(tmdbMovie.id, result.id)
         assertEquals(tmdbMovie.title, result.title)
         assertEquals(tmdbMovie.releaseDate, result.releaseDate)
@@ -86,15 +88,15 @@ class MovieDetailBrokerTest {
     }
 
     @Test
-    fun `getMovieByTitle when both sources fail throws exception`() = runTest {
+    fun `getMovieByTitle when both sources fail returns null`() = runTest {
         val broker = MovieDetailBroker(
             FakeTMDBMoviesExternalSource(shouldThrow = true),
             FakeOMDBMoviesExternalSource(shouldThrow = true)
         )
 
-        assertFailsWith<IllegalStateException> {
-            broker.getMovieByTitle("Movie")
-        }
+        val result = broker.getMovieByTitle("Movie")
+
+        assertNull(result)
     }
 }
 
@@ -133,9 +135,9 @@ private class FakeTMDBMoviesExternalSource(
     private val movieReturn: Movie.MovieItem? = null,
     private val shouldThrow: Boolean = false
 ) : TMDBMoviesExternalSource(buildClient()) {
-    override suspend fun getMovieByTitle(title: String): Movie.MovieItem {
+    override suspend fun getMovieByTitle(title: String): Movie.MovieItem? {
         if (shouldThrow) throw Exception("TMDB error")
-        return movieReturn ?: throw Exception("TMDB not found")
+        return movieReturn
     }
 }
 
@@ -143,8 +145,8 @@ private class FakeOMDBMoviesExternalSource(
     private val movieReturn: Movie.MovieItem? = null,
     private val shouldThrow: Boolean = false
 ) : OMDBMoviesExternalSource(buildClient()) {
-    override suspend fun getMovieByTitle(title: String): Movie.MovieItem {
+    override suspend fun getMovieByTitle(title: String): Movie.MovieItem? {
         if (shouldThrow) throw Exception("OMDB error")
-        return movieReturn ?: throw Exception("OMDB not found")
+        return movieReturn
     }
 }

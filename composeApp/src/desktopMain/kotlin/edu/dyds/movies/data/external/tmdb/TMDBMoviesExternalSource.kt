@@ -18,7 +18,7 @@ open class TMDBMoviesExternalSource(private val tmdbHttpClient: HttpClient) : Po
     override suspend fun getPopularMovies(): List<Movie.MovieItem> =
         tmdbHttpClient.get(POPULAR_MOVIES_PATH).body<RemoteResult>().results.map { it.toMovieItem() }
 
-    open suspend fun getMovieByTitle(title: String): Movie.MovieItem =
+    open suspend fun getMovieByTitle(title: String): Movie.MovieItem? =
         tmdbHttpClient.get(SEARCH_MOVIE_PATH) {
             parameter("query", title)
         }.body<RemoteResult>().results.first().toMovieItem()
