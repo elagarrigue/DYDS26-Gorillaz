@@ -12,7 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-class MovieExternalSourceBrokerTest {
+class MovieDetailBrokerTest {
 
     @Test
     fun `getMovieByTitle when both sources succeed returns merged movie`() = runTest {
@@ -40,7 +40,7 @@ class MovieExternalSourceBrokerTest {
             popularity = 6.0,
             voteAverage = 4.0
         )
-        val broker = MovieExternalSourceBroker(
+        val broker = MovieDetailBroker(
             FakeTMDBMoviesExternalSource(movieReturn = tmdbMovie),
             FakeOMDBMoviesExternalSource(movieReturn = omdbMovie)
         )
@@ -62,7 +62,7 @@ class MovieExternalSourceBrokerTest {
     @Test
     fun `getMovieByTitle when only TMDB succeeds returns TMDB movie with prefixed overview`() = runTest {
         val tmdbMovie = buildMovieItem(overview = "TMDB overview")
-        val broker = MovieExternalSourceBroker(
+        val broker = MovieDetailBroker(
             FakeTMDBMoviesExternalSource(movieReturn = tmdbMovie),
             FakeOMDBMoviesExternalSource(shouldThrow = true)
         )
@@ -75,7 +75,7 @@ class MovieExternalSourceBrokerTest {
     @Test
     fun `getMovieByTitle when only OMDB succeeds returns OMDB movie with prefixed overview`() = runTest {
         val omdbMovie = buildMovieItem(overview = "OMDB overview")
-        val broker = MovieExternalSourceBroker(
+        val broker = MovieDetailBroker(
             FakeTMDBMoviesExternalSource(shouldThrow = true),
             FakeOMDBMoviesExternalSource(movieReturn = omdbMovie)
         )
@@ -87,7 +87,7 @@ class MovieExternalSourceBrokerTest {
 
     @Test
     fun `getMovieByTitle when both sources fail throws exception`() = runTest {
-        val broker = MovieExternalSourceBroker(
+        val broker = MovieDetailBroker(
             FakeTMDBMoviesExternalSource(shouldThrow = true),
             FakeOMDBMoviesExternalSource(shouldThrow = true)
         )

@@ -1,7 +1,7 @@
 package edu.dyds.movies.data
 
-import edu.dyds.movies.data.fakes.FakeMovieExternalSource
-import edu.dyds.movies.data.fakes.FakeMoviesExternalSource
+import edu.dyds.movies.data.fakes.FakeMovieDetailExternalSource
+import edu.dyds.movies.data.fakes.FakePopularMoviesExternalSource
 import edu.dyds.movies.data.fakes.FakeMoviesLocalDataSource
 import edu.dyds.movies.domain.entities.Movie
 import kotlinx.coroutines.test.runTest
@@ -44,8 +44,8 @@ class MoviesRepositoryImplTest {
         val local = FakeMoviesLocalDataSource().apply {
             cachedMoviesReturn = listOf(buildMovie(1), buildMovie(2))
         }
-        val moviesSource = FakeMoviesExternalSource()
-        val movieSource = FakeMovieExternalSource()
+        val moviesSource = FakePopularMoviesExternalSource()
+        val movieSource = FakeMovieDetailExternalSource()
         val repository = MoviesRepositoryImpl(moviesSource, movieSource, local)
 
         val result = repository.getPopularMovies()
@@ -57,10 +57,10 @@ class MoviesRepositoryImplTest {
 
     @Test
     fun `getPopularMovies - when cache is empty and remote succeeds - returns remote movies and saves them`() = runTest {
-        val moviesSource = FakeMoviesExternalSource().apply {
+        val moviesSource = FakePopularMoviesExternalSource().apply {
             popularMoviesReturn = listOf(buildMovieItem(10))
         }
-        val movieSource = FakeMovieExternalSource()
+        val movieSource = FakeMovieDetailExternalSource()
         val local = FakeMoviesLocalDataSource()
         val repository = MoviesRepositoryImpl(moviesSource, movieSource, local)
 
@@ -73,13 +73,13 @@ class MoviesRepositoryImplTest {
 
     @Test
     fun `getPopularMovies - when cache is empty and remote succeeds - passes image data from MovieItem`() = runTest {
-        val moviesSource = FakeMoviesExternalSource().apply {
+        val moviesSource = FakePopularMoviesExternalSource().apply {
             popularMoviesReturn = listOf(buildMovieItem(1).copy(
                 poster = "https://image.tmdb.org/t/p/w185/test_poster.jpg",
                 backdrop = "https://image.tmdb.org/t/p/w780/test_backdrop.jpg"
             ))
         }
-        val movieSource = FakeMovieExternalSource()
+        val movieSource = FakeMovieDetailExternalSource()
         val local = FakeMoviesLocalDataSource()
         val repository = MoviesRepositoryImpl(moviesSource, movieSource, local)
 
@@ -93,8 +93,8 @@ class MoviesRepositoryImplTest {
 
     @Test
     fun `getPopularMovies - when cache is empty and remote fails - returns empty list`() = runTest {
-        val moviesSource = FakeMoviesExternalSource().apply { shouldThrow = true }
-        val movieSource = FakeMovieExternalSource()
+        val moviesSource = FakePopularMoviesExternalSource().apply { shouldThrow = true }
+        val movieSource = FakeMovieDetailExternalSource()
         val local = FakeMoviesLocalDataSource()
         val repository = MoviesRepositoryImpl(moviesSource, movieSource, local)
 
@@ -106,8 +106,8 @@ class MoviesRepositoryImplTest {
 
     @Test
     fun `getMovieDetails - when remote succeeds - returns mapped movie`() = runTest {
-        val moviesSource = FakeMoviesExternalSource()
-        val movieSource = FakeMovieExternalSource().apply {
+        val moviesSource = FakePopularMoviesExternalSource()
+        val movieSource = FakeMovieDetailExternalSource().apply {
             movieReturn = buildMovieItem(42)
         }
         val local = FakeMoviesLocalDataSource()
@@ -124,8 +124,8 @@ class MoviesRepositoryImplTest {
 
     @Test
     fun `getMovieDetails - when remote succeeds - passes image data from MovieItem`() = runTest {
-        val moviesSource = FakeMoviesExternalSource()
-        val movieSource = FakeMovieExternalSource().apply {
+        val moviesSource = FakePopularMoviesExternalSource()
+        val movieSource = FakeMovieDetailExternalSource().apply {
             movieReturn = buildMovieItem(1).copy(
                 poster = "https://image.tmdb.org/t/p/w185/detail_poster.jpg",
                 backdrop = "https://image.tmdb.org/t/p/w780/detail_backdrop.jpg"
@@ -143,8 +143,8 @@ class MoviesRepositoryImplTest {
 
     @Test
     fun `getMovieDetails - when remote succeeds - returns null backdrop when not set`() = runTest {
-        val moviesSource = FakeMoviesExternalSource()
-        val movieSource = FakeMovieExternalSource().apply {
+        val moviesSource = FakePopularMoviesExternalSource()
+        val movieSource = FakeMovieDetailExternalSource().apply {
             movieReturn = buildMovieItem(1).copy(backdrop = null)
         }
         val local = FakeMoviesLocalDataSource()
@@ -158,8 +158,8 @@ class MoviesRepositoryImplTest {
 
     @Test
     fun `getMovieDetails - when remote fails - returns null`() = runTest {
-        val moviesSource = FakeMoviesExternalSource()
-        val movieSource = FakeMovieExternalSource().apply { shouldThrow = true }
+        val moviesSource = FakePopularMoviesExternalSource()
+        val movieSource = FakeMovieDetailExternalSource().apply { shouldThrow = true }
         val local = FakeMoviesLocalDataSource()
         val repository = MoviesRepositoryImpl(moviesSource, movieSource, local)
 

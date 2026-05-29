@@ -1,6 +1,6 @@
 package edu.dyds.movies.data.external.tmdb
 
-import edu.dyds.movies.data.external.MoviesExternalSource
+import edu.dyds.movies.data.external.PopularMoviesExternalSource
 import edu.dyds.movies.domain.entities.Movie
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -13,7 +13,7 @@ private const val SEARCH_MOVIE_PATH = "/3/search/movie"
 private const val POSTER_BASE_URL = "https://image.tmdb.org/t/p/w185"
 private const val BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w780"
 
-open class TMDBMoviesExternalSource(private val tmdbHttpClient: HttpClient) : MoviesExternalSource {
+open class TMDBMoviesExternalSource(private val tmdbHttpClient: HttpClient) : PopularMoviesExternalSource {
 
     override suspend fun getPopularMovies(): List<Movie.MovieItem> =
         tmdbHttpClient.get(POPULAR_MOVIES_PATH).body<RemoteResult>().results.map { it.toMovieItem() }

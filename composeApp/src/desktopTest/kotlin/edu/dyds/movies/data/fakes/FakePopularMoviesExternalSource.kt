@@ -1,9 +1,9 @@
 package edu.dyds.movies.data.fakes
 
-import edu.dyds.movies.data.external.MoviesExternalSource
+import edu.dyds.movies.data.external.PopularMoviesExternalSource
 import edu.dyds.movies.domain.entities.Movie
 
-class FakeMoviesExternalSource : MoviesExternalSource {
+class FakePopularMoviesExternalSource : PopularMoviesExternalSource {
     var popularMoviesReturn: List<Movie.MovieItem> = emptyList()
     var shouldThrow: Boolean = false
     var getPopularMoviesInvocations: Int = 0
