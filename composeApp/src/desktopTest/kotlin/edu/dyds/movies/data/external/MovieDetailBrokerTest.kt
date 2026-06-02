@@ -1,5 +1,6 @@
 package edu.dyds.movies.data.external
 
+import edu.dyds.movies.data.fakes.FakeMovieDetailExternalSource
 import edu.dyds.movies.domain.entities.Movie
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -35,10 +36,9 @@ class MovieDetailBrokerTest {
             popularity = 6.0,
             voteAverage = 4.0
         )
-        val broker = MovieExternalSourceBroker(
-            FakeMovieExternalSource(movieReturn = tmdbMovie),
-            FakeMovieExternalSource(movieReturn = omdbMovie)
-        )
+        val tmdbSource = FakeMovieDetailExternalSource().apply { movieReturn = tmdbMovie }
+        val omdbSource = FakeMovieDetailExternalSource().apply { movieReturn = omdbMovie }
+        val broker = MovieExternalSourceBroker(tmdbSource, omdbSource)
 
         val result = broker.getMovieByTitle("Movie")
 
@@ -58,10 +58,9 @@ class MovieDetailBrokerTest {
     @Test
     fun `getMovieByTitle when only TMDB succeeds returns TMDB movie with prefixed overview`() = runTest {
         val tmdbMovie = buildMovieItem(overview = "TMDB overview")
-        val broker = MovieExternalSourceBroker(
-            FakeMovieExternalSource(movieReturn = tmdbMovie),
-            FakeMovieExternalSource(shouldThrow = true)
-        )
+        val tmdbSource = FakeMovieDetailExternalSource().apply { movieReturn = tmdbMovie }
+        val omdbSource = FakeMovieDetailExternalSource().apply { shouldThrow = true }
+        val broker = MovieExternalSourceBroker(tmdbSource, omdbSource)
 
         val result = broker.getMovieByTitle("Movie")
 
@@ -71,10 +70,9 @@ class MovieDetailBrokerTest {
     @Test
     fun `getMovieByTitle when only OMDB succeeds returns OMDB movie with prefixed overview`() = runTest {
         val omdbMovie = buildMovieItem(overview = "OMDB overview")
-        val broker = MovieExternalSourceBroker(
-            FakeMovieExternalSource(shouldThrow = true),
-            FakeMovieExternalSource(movieReturn = omdbMovie)
-        )
+        val tmdbSource = FakeMovieDetailExternalSource().apply { shouldThrow = true }
+        val omdbSource = FakeMovieDetailExternalSource().apply { movieReturn = omdbMovie }
+        val broker = MovieExternalSourceBroker(tmdbSource, omdbSource)
 
         val result = broker.getMovieByTitle("Movie")
 
@@ -83,10 +81,9 @@ class MovieDetailBrokerTest {
 
     @Test
     fun `getMovieByTitle when both sources fail returns null`() = runTest {
-        val broker = MovieExternalSourceBroker(
-            FakeMovieExternalSource(shouldThrow = true),
-            FakeMovieExternalSource(shouldThrow = true)
-        )
+        val tmdbSource = FakeMovieDetailExternalSource().apply { shouldThrow = true }
+        val omdbSource = FakeMovieDetailExternalSource().apply { shouldThrow = true }
+        val broker = MovieExternalSourceBroker(tmdbSource, omdbSource)
 
         val result = broker.getMovieByTitle("Movie")
 
@@ -117,13 +114,3 @@ private fun buildMovieItem(
     popularity = popularity,
     voteAverage = voteAverage
 )
-
-private class FakeMovieExternalSource(
-    private val movieReturn: Movie.MovieItem? = null,
-    private val shouldThrow: Boolean = false
-) : MovieExternalSource {
-    override suspend fun getMovieByTitle(title: String): Movie.MovieItem? {
-        if (shouldThrow) throw Exception("source error")
-        return movieReturn
-    }
-}
