@@ -9,16 +9,16 @@ class FakeMoviesRepository(
 ) : MoviesRepository {
     var getPopularMoviesInvocations = 0
     var getMovieDetailsInvocations = 0
-    var lastRequestedId: Int? = null
+    var lastRequestedTitle: String? = null
 
     override suspend fun getPopularMovies(): List<Movie> {
         getPopularMoviesInvocations++
         return moviesToReturn
     }
 
-    override suspend fun getMovieDetails(id: Int): Movie? {
+    override suspend fun getMovieDetails(title: String): Movie? {
         getMovieDetailsInvocations++
-        lastRequestedId = id
+        lastRequestedTitle = title
         return movieToReturn
     }
 }

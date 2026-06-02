@@ -22,7 +22,6 @@ import kotlin.test.assertTrue
 class DetailViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val testScope = CoroutineScope(testDispatcher)
 
     @Before
     fun setup() {
@@ -35,14 +34,14 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun `initial state has loading false and null movie`() = runTest {
+    fun `initial state has loading false and null movie`() = runTest(testDispatcher) {
         // arrange
         val useCase = FakeGetMovieDetailsUseCase()
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailViewModel.MovieDetailUiState>()
 
         // act
-        testScope.launch { viewModel.movieDetailStateFlow.collect { states.add(it) } }
+        backgroundScope.launch { viewModel.movieDetailStateFlow.collect { states.add(it) } }
 
         // assert
         assertEquals(1, states.size)
@@ -51,17 +50,17 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun `getMovieDetail should end with loading false and movie`() = runTest {
+    fun `getMovieDetail should end with loading false and movie`() = runTest(testDispatcher) {
         // arrange
         val expected = createDefaultMovie(id = 42, title = "The Answer")
         val useCase = FakeGetMovieDetailsUseCase(movie = expected)
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailViewModel.MovieDetailUiState>()
 
-        testScope.launch { viewModel.movieDetailStateFlow.collect { states.add(it) } }
+        backgroundScope.launch { viewModel.movieDetailStateFlow.collect { states.add(it) } }
 
         // act
-        viewModel.getMovieDetail(42)
+        viewModel.getMovieDetail("The Answer")
 
         // assert
         assertTrue(states.isNotEmpty())
@@ -71,36 +70,36 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun `getMovieDetail should invoke use case once, pass correct id and emit movie`() = runTest {
+    fun `getMovieDetail should invoke use case once, pass correct title and emit movie`() = runTest(testDispatcher) {
         // arrange
         val expected = createDefaultMovie()
         val useCase = FakeGetMovieDetailsUseCase(movie = expected)
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailViewModel.MovieDetailUiState>()
 
-        testScope.launch { viewModel.movieDetailStateFlow.collect { states.add(it) } }
+        backgroundScope.launch { viewModel.movieDetailStateFlow.collect { states.add(it) } }
 
         // act
-        viewModel.getMovieDetail(42)
+        viewModel.getMovieDetail("Test Movie")
 
         // assert
         assertEquals(1, useCase.invocations)
-        assertEquals(42, useCase.lastRequestedId)
+        assertEquals("Test Movie", useCase.lastRequestedTitle)
         assertTrue(states.isNotEmpty())
         assertEquals(expected, states.last().movie)
     }
 
     @Test
-    fun `getMovieDetail should end with null movie when use case returns null`() = runTest {
+    fun `getMovieDetail should end with null movie when use case returns null`() = runTest(testDispatcher) {
         // arrange
         val useCase = FakeGetMovieDetailsUseCase(movie = null)
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailViewModel.MovieDetailUiState>()
 
-        testScope.launch { viewModel.movieDetailStateFlow.collect { states.add(it) } }
+        backgroundScope.launch { viewModel.movieDetailStateFlow.collect { states.add(it) } }
 
         // act
-        viewModel.getMovieDetail(7)
+        viewModel.getMovieDetail("Some Movie")
 
         // assert
         assertTrue(states.isNotEmpty())
@@ -109,16 +108,16 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun `getMovieDetail should emit loading true state before emitting movie`() = runTest {
+    fun `getMovieDetail should emit loading true state before emitting movie`() = runTest(testDispatcher) {
         // arrange
         val useCase = FakeGetMovieDetailsUseCase(movie = createDefaultMovie())
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailViewModel.MovieDetailUiState>()
 
-        testScope.launch { viewModel.movieDetailStateFlow.collect { states.add(it) } }
+        backgroundScope.launch { viewModel.movieDetailStateFlow.collect { states.add(it) } }
 
         // act
-        viewModel.getMovieDetail(1)
+        viewModel.getMovieDetail("Test Movie")
 
         // assert
         assertTrue(states.size >= 2)

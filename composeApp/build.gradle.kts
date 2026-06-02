@@ -39,6 +39,11 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
             runtimeOnly(libs.slf4j.simple)
         }
+        val desktopTest by getting {
+            dependencies {
+                implementation(libs.ktor.client.mock)
+            }
+        }
     }
 
     sourceSets.commonMain {

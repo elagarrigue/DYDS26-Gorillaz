@@ -11,6 +11,19 @@ data class Movie(
     val originalLanguage: String,
     val popularity: Double,
     val voteAverage: Double
-)
+) {
+    data class MovieItem(
+        val id: Int,
+        val title: String,
+        val overview: String,
+        val releaseDate: String,
+        val poster: String,
+        val backdrop: String?,
+        val originalTitle: String,
+        val originalLanguage: String,
+        val popularity: Double,
+        val voteAverage: Double
+    )
+}
 
 data class QualifiedMovie(val movie: Movie, val isGoodMovie: Boolean)
